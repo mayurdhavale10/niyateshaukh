@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
     "date-fns": "^4.1.0",
     "html5-qrcode": "^2.3.8",
     "lottie-react": "^2.4.1",
