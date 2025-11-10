@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Calendar, Users, UserCheck, QrCode, Settings, BarChart3 } from 'lucide-react';
+import ThreeJSBackground from '@/components/threejsbackground';
+import Navbar from '@/components/Navbar';
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
@@ -17,8 +19,9 @@ export default function AdminDashboard() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <ThreeJSBackground />
+        <div className="relative z-10 text-white text-xl">Loading...</div>
       </div>
     );
   }
@@ -28,27 +31,37 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
-      {/* Header */}
-      <header className="bg-black bg-opacity-20 backdrop-blur-lg border-b border-purple-500 border-opacity-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen relative">
+      {/* Three.js Background */}
+      <ThreeJSBackground />
+
+      {/* Navbar */}
+      <Navbar />
+
+      {/* Header Section */}
+      <header className="relative z-10 bg-black bg-opacity-20 backdrop-blur-lg border-b border-purple-500 border-opacity-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 
-                className="text-3xl font-bold text-white"
+                className="text-4xl font-bold text-white mb-2"
                 style={{ fontFamily: "'Berkshire Swash', cursive" }}
               >
                 Admin Dashboard
               </h1>
-              <p className="text-purple-200 mt-1">
-                Welcome back, {session.user?.name || 'Admin'}
+              <p className="text-purple-200 text-lg">
+                Welcome back, {session.user?.name || 'Admin'}! 👋
               </p>
             </div>
             <div className="flex items-center gap-4">
+              <div className="text-right mr-3">
+                <p className="text-white font-medium">{session.user?.name}</p>
+                <p className="text-purple-300 text-sm">{session.user?.email}</p>
+              </div>
               <img 
-                src={session.user?.image || ''} 
+                src={session.user?.image || '/default-avatar.png'} 
                 alt="Profile" 
-                className="w-10 h-10 rounded-full border-2 border-purple-400"
+                className="w-12 h-12 rounded-full border-2 border-purple-400 shadow-lg"
               />
             </div>
           </div>
@@ -56,7 +69,7 @@ export default function AdminDashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -151,7 +164,7 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-purple-300 border-opacity-20">
+    <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-purple-300 border-opacity-20 hover:bg-opacity-15 transition-all duration-300">
       <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${color} mb-4`}>
         <div className="text-white">
           {icon}
