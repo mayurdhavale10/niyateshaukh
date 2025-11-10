@@ -4,7 +4,9 @@ import RegistrationModel from '@/lib/models/Registration';
 import EventModel from '@/lib/models/Event';
 
 /**
- * GET /api/registrations - Retrieve existing ticket by phone/email
+ * GET /api/registrations
+ * Query by: userId (preferred for scanner) OR phone/email
+ * Optional: eventId to scope the search
  */
 export async function GET(req: NextRequest) {
   try {
@@ -14,21 +16,21 @@ export async function GET(req: NextRequest) {
     const phone = searchParams.get('phone');
     const email = searchParams.get('email');
     const eventId = searchParams.get('eventId');
+    const userId = searchParams.get('userId');
 
-    if (!phone && !email) {
+    if (!phone && !email && !userId) {
       return NextResponse.json(
-        { error: 'Please provide phone number or email' },
+        { error: 'Provide phone, email, or userId' },
         { status: 400 }
       );
     }
 
-    let query: any = {};
-    
-    if (eventId) {
-      query.eventId = eventId;
-    }
+    const query: Record<string, any> = {};
+    if (eventId) query.eventId = eventId;
 
-    if (phone && email) {
+    if (userId) {
+      query.userId = userId; // ✅ primary path for scanner
+    } else if (phone && email) {
       query.$or = [{ phone }, { email }];
     } else if (phone) {
       query.phone = phone;
@@ -37,7 +39,6 @@ export async function GET(req: NextRequest) {
     }
 
     const registration = await RegistrationModel.findOne(query).lean();
-
     if (!registration) {
       return NextResponse.json(
         { error: 'No ticket found with the provided information' },
@@ -46,7 +47,6 @@ export async function GET(req: NextRequest) {
     }
 
     const event = await EventModel.findById(registration.eventId).lean();
-
     if (!event) {
       return NextResponse.json(
         { error: 'Event not found for this ticket' },
@@ -70,7 +70,6 @@ export async function GET(req: NextRequest) {
         registeredAt: registration.registeredAt,
       },
     });
-
   } catch (error) {
     console.error('❌ Retrieve ticket error:', error);
     return NextResponse.json(
@@ -81,7 +80,8 @@ export async function GET(req: NextRequest) {
 }
 
 /**
- * POST /api/registrations - Create new registration or return existing
+ * POST /api/registrations
+ * Create new registration or return existing (by phone+event)
  */
 export async function POST(req: NextRequest) {
   try {
@@ -99,10 +99,7 @@ export async function POST(req: NextRequest) {
 
     // Validation
     if (!eventId) {
-      return NextResponse.json(
-        { error: 'Event ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Event ID is required' }, { status: 400 });
     }
 
     if (!name?.trim() || !phone?.trim()) {
@@ -126,13 +123,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if event exists and is active
+    // Event checks
     const event = await EventModel.findById(eventId);
     if (!event) {
-      return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
     if (!event.registrationOpen) {
@@ -142,7 +136,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ⭐ CHECK IF PHONE NUMBER ALREADY REGISTERED FOR THIS EVENT
+    // Existing by phone+event
     const existingRegistration = await RegistrationModel.findOne({
       eventId,
       phone: phone.trim(),
@@ -150,8 +144,6 @@ export async function POST(req: NextRequest) {
 
     if (existingRegistration) {
       console.log('📱 Phone already registered, returning existing ticket:', existingRegistration.userId);
-      
-      // Return the existing registration with a flag
       return NextResponse.json(
         {
           registration: {
@@ -172,7 +164,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check capacity
+    // Capacity
     const capacityKey = registrationType === 'performer' ? 'performers' : 'audience';
     if (event.registered[capacityKey] >= event.capacity[capacityKey]) {
       return NextResponse.json(
@@ -181,30 +173,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate unique user ID
+    // Generate userId
     const count = await RegistrationModel.countDocuments({ eventId });
     const paddedCount = String(count + 1).padStart(4, '0');
     const prefix = registrationType === 'performer' ? 'P' : 'A';
     const userId = `${prefix}${paddedCount}`;
 
-    // Create QR code data
-    const qrData = JSON.stringify({
+    // ✅ QR payload now includes phone (and name) for offline scan fallback
+    const qrPayload = {
       userId,
       eventId,
       name: name.trim(),
+      phone: phone.trim(),
       type: registrationType,
-    });
+    };
 
-    // Generate QR code (you'll need to implement this based on your QR library)
-    // For now, using a placeholder - replace with actual QR generation
-    const QRCode = require('qrcode');
-    const qrCodeDataURL = await QRCode.toDataURL(qrData, {
+    // Generate QR code (ESM-friendly)
+    const { toDataURL } = await import('qrcode');
+    const qrCodeDataURL = await toDataURL(JSON.stringify(qrPayload), {
       width: 300,
       margin: 2,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF',
-      },
+      color: { dark: '#000000', light: '#FFFFFF' },
     });
 
     // Create registration
@@ -220,7 +209,7 @@ export async function POST(req: NextRequest) {
       registeredAt: new Date(),
     });
 
-    // Update event registration counts
+    // Update event counters
     await EventModel.findByIdAndUpdate(eventId, {
       $inc: {
         [`registered.${capacityKey}`]: 1,
@@ -248,7 +237,6 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-
   } catch (error: any) {
     console.error('❌ Registration error:', error);
     return NextResponse.json(

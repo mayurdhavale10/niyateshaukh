@@ -14,8 +14,6 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ThreeJSBackground from '@/components/threejsbackground';
-
-// React-19 friendly
 import { BrowserMultiFormatReader } from '@zxing/browser';
 
 type ScannedEntry = {
@@ -64,12 +62,9 @@ export default function AdminScanner() {
   // Start/stop the camera when scanning toggles
   useEffect(() => {
     if (!scanning) {
-      // stop tracks and clear video
       const stream = videoRef.current?.srcObject as MediaStream | null;
-      stream?.getTracks().forEach((t) => t.stop());
+      stream?.getTracks().forEach(t => t.stop());
       if (videoRef.current) videoRef.current.srcObject = null;
-
-      // drop reader reference; callbacks will be ignored via flag
       scanningActiveRef.current = false;
       readerRef.current = null;
       return;
@@ -86,21 +81,17 @@ export default function AdminScanner() {
         const reader = new BrowserMultiFormatReader();
         readerRef.current = reader;
 
-        // Auto-select device. NOTE: use undefined (not null).
         await reader.decodeFromVideoDevice(
-          undefined,
+          undefined, // auto-select device
           videoRef.current,
-          (res) => {
+          res => {
             if (!isMounted || !scanningActiveRef.current || !res) return;
 
             const text = typeof res.getText === 'function' ? res.getText() : '';
             if (!text) return;
 
             const now = Date.now();
-            // cooldown to avoid duplicate spam
-            if (text === lastDecodedRef.current && now - lastDecodedAtRef.current < 1250) {
-              return;
-            }
+            if (text === lastDecodedRef.current && now - lastDecodedAtRef.current < 1250) return;
             lastDecodedRef.current = text;
             lastDecodedAtRef.current = now;
 
@@ -122,12 +113,9 @@ export default function AdminScanner() {
     return () => {
       isMounted = false;
       scanningActiveRef.current = false;
-
-      // stop tracks and clear video
       const stream = videoRef.current?.srcObject as MediaStream | null;
-      stream?.getTracks().forEach((t) => t.stop());
+      stream?.getTracks().forEach(t => t.stop());
       if (videoRef.current) videoRef.current.srcObject = null;
-
       readerRef.current = null;
     };
   }, [scanning]);
@@ -148,21 +136,19 @@ export default function AdminScanner() {
         throw new Error('Invalid QR code: not JSON');
       }
 
-      const { userId, eventId, name, type } = parsed || {};
-      if (!userId || !eventId) {
-        throw new Error('Invalid QR code format');
-      }
+      const { userId, eventId, name, type, phone } = parsed || {};
+      if (!userId || !eventId) throw new Error('Invalid QR code format');
 
       // already scanned?
-      const alreadyScanned = scannedEntries.some((e) => e.userId === userId);
+      const alreadyScanned = scannedEntries.some(e => e.userId === userId);
       if (alreadyScanned) {
         setError(`Already scanned: ${name ?? 'User'} (${userId})`);
         setTimeout(() => setError(null), 3000);
         return;
       }
 
-      // fetch registration details
-      const res = await fetch(`/api/registrations?eventId=${eventId}`);
+      // fetch registration details (eventId + userId)
+      const res = await fetch(`/api/registrations?eventId=${eventId}&userId=${userId}`);
       let registrationData;
       if (res.ok) {
         const data = await res.json();
@@ -170,21 +156,22 @@ export default function AdminScanner() {
           userId,
           name,
           registrationType: type,
-          phone: 'N/A',
+          phone: phone || 'N/A',
         };
       } else {
+        // fallback to QR payload (uses phone from QR if present)
         registrationData = {
           userId,
           name,
           registrationType: type,
-          phone: 'N/A',
+          phone: phone || 'N/A',
         };
       }
 
       const scanEntry: ScannedEntry = {
         userId: registrationData.userId || userId,
         name: registrationData.name || name || 'Unknown',
-        phone: registrationData.phone || 'N/A',
+        phone: registrationData.phone || phone || 'N/A',
         registrationType: registrationData.registrationType || type || 'attendee',
         performanceType: registrationData.performanceType,
         scannedAt: new Date().toISOString(),
@@ -204,7 +191,7 @@ export default function AdminScanner() {
       }
 
       // update UI
-      setScannedEntries((prev) => [scanEntry, ...prev]);
+      setScannedEntries(prev => [scanEntry, ...prev]);
       setLastScan(scanEntry);
       setSuccess(`✓ Scanned: ${scanEntry.name}`);
       setTimeout(() => setSuccess(null), 3000);
@@ -223,7 +210,7 @@ export default function AdminScanner() {
     }
 
     const headers = ['User ID', 'Name', 'Phone', 'Type', 'Performance Type', 'Scanned At'];
-    const rows = scannedEntries.map((e) => [
+    const rows = scannedEntries.map(e => [
       e.userId,
       e.name,
       e.phone,
@@ -232,7 +219,7 @@ export default function AdminScanner() {
       new Date(e.scannedAt).toLocaleString('en-IN'),
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map((r) => r.map((c) => `"${c}"`).join(','))].join(
+    const csvContent = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join(
       '\n'
     );
 
@@ -282,7 +269,7 @@ export default function AdminScanner() {
               <div className="flex justify-center">
                 <button
                   onClick={() => {
-                    setScanning((s) => !s);
+                    setScanning(s => !s);
                     setCameraError(null);
                   }}
                   className={`px-8 py-4 rounded-2xl font-semibold transition-all duration-300 flex items-center gap-3 ${
