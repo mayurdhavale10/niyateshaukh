@@ -1,13 +1,30 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import { PlayCircle, Feather } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import Image from 'next/image';
 
-const VIDEO_ID = 'dAz9Birr4Qs';
+const size1Images = [
+  '/size1/IMG_0791.webp',
+  '/size1/IMG_0797 (1).webp',
+  '/size1/IMG_0801.webp',
+  '/size1/IMG_0802.webp',
+  '/size1/IMG_0808.webp',
+];
 
-export default function NiyatVideoShayari() {
+const size2Images = [
+  '/size2/IMG_0790.webp',
+  '/size2/IMG_0799.webp',
+  '/size2/IMG_0800.webp',
+  '/size2/IMG_0805.webp',
+  '/size2/IMG_0812.webp',
+];
+
+const allImages = [...size1Images, ...size2Images];
+
+export default function Gallery() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -217,15 +234,11 @@ export default function NiyatVideoShayari() {
     };
   }, []);
 
-  const handleStartStory = () => {
-    alert('Navigating to events page...');
-  };
-
   return (
     <section className="relative min-h-screen overflow-hidden">
       {/* Google Fonts */}
       <link 
-        href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&family=Lora:wght@400;600;700&display=swap" 
+        href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&display=swap" 
         rel="stylesheet" 
       />
       
@@ -244,101 +257,88 @@ export default function NiyatVideoShayari() {
       <div className="relative z-10 py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center mb-12">
+          {/* Gallery Heading */}
+          <div className="text-center mb-16">
             <h2 
-              className="text-3xl sm:text-4xl font-extrabold text-white mb-2"
-              style={{ fontFamily: "'Berkshire Swash', cursive" }}
-            >
-              सुनाने आये हो तो ये मंच तुम्हारा<br />
-              और सुनने आये हो तो जिंदाबाद शौक तुम्हारा
-            </h2>
-            <p 
-              className="text-purple-300 text-lg"
-              style={{ fontFamily: "'Lora', serif", fontWeight: 600 }}
-            >
-              Witness the intent behind the desire, live and unfiltered.
-            </p>
-          </div>
-
-          {/* Two-Column Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
-            
-            {/* LEFT COLUMN: Mission Text */}
-            <div 
-              className="p-6 sm:p-10 rounded-xl shadow-2xl transition-all duration-300 h-full"
+              className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-white mb-4"
               style={{ 
-                background: 'rgba(51, 0, 77, 0.4)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                boxShadow: '0 0 30px rgba(186, 85, 211, 0.2)',
+                fontFamily: "'Berkshire Swash', cursive",
+                textShadow: '0 0 20px rgba(186, 85, 211, 0.6)',
               }}
             >
-              <Feather size={32} className="text-purple-400 mb-4" />
-              
-              <h3 
-                className="text-2xl text-white font-bold mb-4"
-                style={{ fontFamily: "'Berkshire Swash', cursive" }}
-              >
-                हर अल्फ़ाज़, एक ख़ज़ाना
-              </h3>
+              Gallery
+            </h2>
+            <div 
+              className="w-32 h-1 mx-auto rounded-full"
+              style={{
+                background: 'linear-gradient(90deg, transparent, #ba55d3, transparent)',
+              }}
+            />
+          </div>
 
-              <blockquote className="my-6 p-4 border-l-4 border-purple-500 bg-purple-900 bg-opacity-30 rounded-r-lg">
-                <p 
-                  className="text-xl italic text-purple-200"
-                  style={{ fontFamily: "'Berkshire Swash', cursive" }}
-                >
-                  "यह <strong>'नीयत-ए-शौक़'</strong> है <strong>ख़्वाबों का आशियाना</strong>,<br />
-                  <strong>शायर</strong> जहाँ बाँटें <strong>अल्फ़ाज़</strong> का <strong>ख़ज़ाना</strong>।"
-                </p>
-              </blockquote>
-
-              <p 
-                className="text-purple-100 text-lg leading-relaxed mb-6"
-                style={{ fontFamily: "'Lora', serif", fontWeight: 400 }}
-              >
-                Niyat-e-Shaukh is a sacred space for pure creation and connection, offering every poet a stage (manch) to share the raw power of their voice and build the legacy of tomorrow.
-              </p>
-
-              <button
-                onClick={handleStartStory}
-                className="mt-8 flex items-center justify-center w-full py-3 px-6 rounded-full text-white font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
+          {/* Gallery Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            {allImages.map((image, index) => (
+              <div
+                key={index}
+                className="group relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105"
                 style={{
-                  background: 'linear-gradient(90deg, #6a3a8a 0%, #ba55d3 100%)',
-                  boxShadow: '0 4px 15px rgba(186, 85, 211, 0.4)',
+                  background: 'rgba(51, 0, 77, 0.3)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: '0 8px 32px rgba(186, 85, 211, 0.2)',
                 }}
+                onClick={() => setSelectedImage(image)}
               >
-                <PlayCircle size={20} className="mr-2" />
-                Start Your Story
-              </button>
-            </div>
-
-            {/* RIGHT COLUMN: YouTube Video */}
-            <div className="rounded-xl overflow-hidden shadow-2xl w-full" 
-                 style={{ 
-                   boxShadow: '0 0 30px rgba(186, 85, 211, 0.3)',
-                 }}
-            >
-              <div className="relative" style={{ paddingBottom: '56.25%' }}>
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full"
-                  src={`https://www.youtube.com/embed/${VIDEO_ID}`}
-                  title="Niyat-e-Shaukh Mehfil Video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+                <div className="relative aspect-square">
+                  <Image
+                    src={image}
+                    alt={`Gallery image ${index + 1}`}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                  />
+                  <div 
+                    className="absolute inset-0 bg-gradient-to-t from-purple-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  />
+                </div>
               </div>
-              
-              <div 
-                className="mt-4 p-4 text-center bg-gray-900 bg-opacity-50 text-purple-400 text-sm rounded-b-xl"
-                style={{ fontFamily: "'Lora', serif", fontWeight: 400 }}
-              >
-                A glimpse into the soul of a Niyat-e-Shaukh Mehfil.
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div 
+            className="relative max-w-5xl max-h-[90vh] w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute -top-12 right-0 text-white text-4xl font-bold hover:text-purple-400 transition-colors"
+              onClick={() => setSelectedImage(null)}
+            >
+              ×
+            </button>
+            <div className="relative w-full h-full">
+              <Image
+                src={selectedImage}
+                alt="Selected gallery image"
+                width={1200}
+                height={1200}
+                className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
+                style={{
+                  boxShadow: '0 0 50px rgba(186, 85, 211, 0.5)',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

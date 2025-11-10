@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { PlayCircle, Feather } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import * as THREE from 'three';
 
-const VIDEO_ID = 'dAz9Birr4Qs';
-
-export default function NiyatVideoShayari() {
+export default function MehfilGallery() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -217,9 +217,17 @@ export default function NiyatVideoShayari() {
     };
   }, []);
 
-  const handleStartStory = () => {
-    alert('Navigating to events page...');
+  const handleContactUs = () => {
+    router.push('/contactus');
   };
+
+  const seasons = [
+    { id: 5, image: '/mehfil/season5.webp' },
+    { id: 4, image: '/mehfil/season4.webp' },
+    { id: 3, image: '/mehfil/season3.webp' },
+    { id: 2, image: '/mehfil/season2.webp' },
+    { id: 1, image: '/mehfil/season1.webp' },
+  ];
 
   return (
     <section className="relative min-h-screen overflow-hidden">
@@ -244,98 +252,60 @@ export default function NiyatVideoShayari() {
       <div className="relative z-10 py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center mb-12">
+          {/* Header */}
+          <div className="text-center mb-16">
             <h2 
-              className="text-3xl sm:text-4xl font-extrabold text-white mb-2"
+              className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 flex items-center justify-center gap-3"
               style={{ fontFamily: "'Berkshire Swash', cursive" }}
             >
-              सुनाने आये हो तो ये मंच तुम्हारा<br />
-              और सुनने आये हो तो जिंदाबाद शौक तुम्हारा
+              Mehfil 
+              <span className="text-purple-500 animate-pulse">❤️</span>
             </h2>
             <p 
-              className="text-purple-300 text-lg"
+              className="text-purple-300 text-lg md:text-xl max-w-3xl mx-auto mb-8"
               style={{ fontFamily: "'Lora', serif", fontWeight: 600 }}
             >
-              Witness the intent behind the desire, live and unfiltered.
+              Be a Part of Our Success: Sponsor the Next Chapter of Mehfil!
             </p>
-          </div>
-
-          {/* Two-Column Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-start">
             
-            {/* LEFT COLUMN: Mission Text */}
-            <div 
-              className="p-6 sm:p-10 rounded-xl shadow-2xl transition-all duration-300 h-full"
-              style={{ 
-                background: 'rgba(51, 0, 77, 0.4)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                boxShadow: '0 0 30px rgba(186, 85, 211, 0.2)',
+            {/* Contact Us Button */}
+            <button
+              onClick={handleContactUs}
+              className="inline-flex items-center justify-center px-8 py-3 rounded-full text-white font-semibold text-lg transition-all duration-300 transform hover:scale-105 active:scale-95"
+              style={{
+                background: 'linear-gradient(90deg, #6a3a8a 0%, #ba55d3 100%)',
+                boxShadow: '0 4px 20px rgba(186, 85, 211, 0.4)',
+                fontFamily: "'Lora', serif",
+                fontWeight: 700,
               }}
             >
-              <Feather size={32} className="text-purple-400 mb-4" />
-              
-              <h3 
-                className="text-2xl text-white font-bold mb-4"
-                style={{ fontFamily: "'Berkshire Swash', cursive" }}
-              >
-                हर अल्फ़ाज़, एक ख़ज़ाना
-              </h3>
+              Contact Us
+            </button>
+          </div>
 
-              <blockquote className="my-6 p-4 border-l-4 border-purple-500 bg-purple-900 bg-opacity-30 rounded-r-lg">
-                <p 
-                  className="text-xl italic text-purple-200"
-                  style={{ fontFamily: "'Berkshire Swash', cursive" }}
-                >
-                  "यह <strong>'नीयत-ए-शौक़'</strong> है <strong>ख़्वाबों का आशियाना</strong>,<br />
-                  <strong>शायर</strong> जहाँ बाँटें <strong>अल्फ़ाज़</strong> का <strong>ख़ज़ाना</strong>।"
-                </p>
-              </blockquote>
-
-              <p 
-                className="text-purple-100 text-lg leading-relaxed mb-6"
-                style={{ fontFamily: "'Lora', serif", fontWeight: 400 }}
-              >
-                Niyat-e-Shaukh is a sacred space for pure creation and connection, offering every poet a stage (manch) to share the raw power of their voice and build the legacy of tomorrow.
-              </p>
-
-              <button
-                onClick={handleStartStory}
-                className="mt-8 flex items-center justify-center w-full py-3 px-6 rounded-full text-white font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
+          {/* Photo Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {seasons.map((season) => (
+              <div
+                key={season.id}
+                className="relative overflow-hidden rounded-2xl shadow-2xl transition-all duration-300"
                 style={{
-                  background: 'linear-gradient(90deg, #6a3a8a 0%, #ba55d3 100%)',
-                  boxShadow: '0 4px 15px rgba(186, 85, 211, 0.4)',
+                  background: 'rgba(51, 0, 77, 0.3)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(186, 85, 211, 0.3)',
                 }}
               >
-                <PlayCircle size={20} className="mr-2" />
-                Start Your Story
-              </button>
-            </div>
-
-            {/* RIGHT COLUMN: YouTube Video */}
-            <div className="rounded-xl overflow-hidden shadow-2xl w-full" 
-                 style={{ 
-                   boxShadow: '0 0 30px rgba(186, 85, 211, 0.3)',
-                 }}
-            >
-              <div className="relative" style={{ paddingBottom: '56.25%' }}>
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full"
-                  src={`https://www.youtube.com/embed/${VIDEO_ID}`}
-                  title="Niyat-e-Shaukh Mehfil Video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+                {/* Image Container */}
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <Image
+                    src={season.image}
+                    alt={`Mehfil Season ${season.id}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
               </div>
-              
-              <div 
-                className="mt-4 p-4 text-center bg-gray-900 bg-opacity-50 text-purple-400 text-sm rounded-b-xl"
-                style={{ fontFamily: "'Lora', serif", fontWeight: 400 }}
-              >
-                A glimpse into the soul of a Niyat-e-Shaukh Mehfil.
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>

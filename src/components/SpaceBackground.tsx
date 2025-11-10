@@ -234,6 +234,12 @@ export default function SpaceBackground() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
+      {/* Google Fonts Link */}
+      <link 
+        href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&family=Lora:wght@600;700&display=swap" 
+        rel="stylesheet" 
+      />
+      
       {/* Purple gradient background */}
       <div 
         className="absolute inset-0"
@@ -317,23 +323,17 @@ export default function SpaceBackground() {
           Niyat e Shaukh
         </h1>
         
-        {/* Subtitle */}
+        {/* Subtitle - Now with Lora font and bold weight */}
         <p 
           className="text-white text-base md:text-lg lg:text-xl text-center max-w-2xl"
           style={{
-            fontFamily: "'Berkshire Swash', cursive",
-            fontWeight: 400,
-            letterSpacing: '0.05em',
+            fontFamily: "'Lora', serif",
+            fontWeight: 700,
+            letterSpacing: '0.03em',
           }}
         >
           a home for storytellers, poets<br />and dreamers
         </p>
-      
-      {/* Google Fonts Link */}
-      <link 
-        href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&display=swap" 
-        rel="stylesheet" 
-      />
       </div>
     </div>
   );
