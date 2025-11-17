@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Calendar, Users, UserCheck, QrCode, Settings, BarChart3 } from 'lucide-react';
+import { QrCode, Settings } from 'lucide-react';
 import ThreeJSBackground from '@/components/threejsbackground';
 import Navbar from '@/components/Navbar';
 
@@ -19,9 +19,12 @@ export default function AdminDashboard() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center relative">
         <ThreeJSBackground />
-        <div className="relative z-10 text-white text-xl">Loading...</div>
+        <div className="relative z-10">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent"></div>
+          <p className="text-white mt-4 text-lg">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -31,176 +34,139 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-x-hidden">
       {/* Three.js Background */}
-      <ThreeJSBackground />
+      <div className="fixed inset-0 z-0">
+        <ThreeJSBackground />
+      </div>
 
       {/* Navbar */}
       <Navbar />
 
-      {/* Header Section */}
-      <header className="relative z-10 bg-black bg-opacity-20 backdrop-blur-lg border-b border-purple-500 border-opacity-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 
-                className="text-4xl font-bold text-white mb-2"
-                style={{ fontFamily: "'Berkshire Swash', cursive" }}
-              >
-                Admin Dashboard
-              </h1>
-              <p className="text-purple-200 text-lg">
-                Welcome back, {session.user?.name || 'Admin'}! 👋
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right mr-3">
-                <p className="text-white font-medium">{session.user?.name}</p>
-                <p className="text-purple-300 text-sm">{session.user?.email}</p>
-              </div>
+      {/* Main Content */}
+      <main className="relative z-10 w-full px-3 sm:px-4 md:px-6 pt-20 sm:pt-24 pb-12">
+        <div className="max-w-5xl mx-auto">
+          
+          {/* Welcome Header */}
+          <div className="text-center mb-8 sm:mb-12 space-y-3 sm:space-y-4">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight">
+              Admin Dashboard
+            </h1>
+            <div className="flex items-center justify-center gap-3 sm:gap-4">
               <img 
                 src={session.user?.image || '/default-avatar.png'} 
                 alt="Profile" 
-                className="w-12 h-12 rounded-full border-2 border-purple-400 shadow-lg"
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-3 border-purple-400 shadow-lg"
               />
+              <div className="text-left">
+                <p className="text-white font-semibold text-base sm:text-lg">
+                  {session.user?.name || 'Admin'}
+                </p>
+                <p className="text-purple-300 text-xs sm:text-sm">
+                  {session.user?.email}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            
+            {/* Event Manager Card */}
+            <a
+              href="/admin/event-manager"
+              className="group relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-white/20 hover:border-purple-400/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/30"
+            >
+              {/* Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative z-10">
+                {/* Icon */}
+                <div className="inline-flex p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-purple-600 to-purple-800 mb-4 sm:mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-xl">
+                  <Settings className="text-white" size={40} />
+                </div>
+                
+                {/* Content */}
+                <h3 className="text-white text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 group-hover:text-purple-200 transition-colors">
+                  Event Manager
+                </h3>
+                <p className="text-purple-200 text-sm sm:text-base leading-relaxed">
+                  Create and manage events, update details, and control registrations
+                </p>
+                
+                {/* Arrow Indicator */}
+                <div className="mt-4 sm:mt-6 flex items-center text-purple-300 group-hover:text-white transition-colors">
+                  <span className="text-sm sm:text-base font-medium">Manage Events</span>
+                  <svg 
+                    className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            </a>
+
+            {/* QR Scanner Card */}
+            <a
+              href="/admin/scanner"
+              className="group relative overflow-hidden bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-white/20 hover:border-green-400/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/30"
+            >
+              {/* Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative z-10">
+                {/* Icon */}
+                <div className="inline-flex p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-green-600 to-green-800 mb-4 sm:mb-6 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500 shadow-xl">
+                  <QrCode className="text-white" size={40} />
+                </div>
+                
+                {/* Content */}
+                <h3 className="text-white text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 group-hover:text-green-200 transition-colors">
+                  QR Scanner
+                </h3>
+                <p className="text-green-200 text-sm sm:text-base leading-relaxed">
+                  Scan tickets at the gate and verify attendee registrations instantly
+                </p>
+                
+                {/* Arrow Indicator */}
+                <div className="mt-4 sm:mt-6 flex items-center text-green-300 group-hover:text-white transition-colors">
+                  <span className="text-sm sm:text-base font-medium">Scan Tickets</span>
+                  <svg 
+                    className="w-5 h-5 ml-2 group-hover:translate-x-2 transition-transform duration-300" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          {/* Quick Info Section */}
+          <div className="mt-8 sm:mt-12 bg-white/5 backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-white/10">
+            <h2 className="text-white text-xl sm:text-2xl font-bold mb-4">Quick Tips</h2>
+            <div className="space-y-3 text-purple-200 text-sm sm:text-base">
+              <div className="flex items-start gap-3">
+                <span className="text-purple-400 text-xl">✨</span>
+                <p>Use Event Manager to create new events and update existing ones</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-green-400 text-xl">🎫</span>
+                <p>QR Scanner allows you to verify tickets quickly at the venue entrance</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-blue-400 text-xl">📱</span>
+                <p>Both tools work seamlessly on mobile devices for on-the-go management</p>
+              </div>
             </div>
           </div>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard
-            icon={<Users size={24} />}
-            title="Total Registrations"
-            value="0"
-            color="from-blue-500 to-blue-600"
-          />
-          <StatCard
-            icon={<UserCheck size={24} />}
-            title="Checked In"
-            value="0"
-            color="from-green-500 to-green-600"
-          />
-          <StatCard
-            icon={<Users size={24} />}
-            title="Performers"
-            value="0"
-            color="from-purple-500 to-purple-600"
-          />
-          <StatCard
-            icon={<Calendar size={24} />}
-            title="Days Left"
-            value="TBA"
-            color="from-orange-500 to-orange-600"
-          />
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-white mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ActionCard
-              icon={<Settings size={32} />}
-              title="Event Manager"
-              description="Create and manage events"
-              href="/admin/event-manager"
-              color="bg-purple-600"
-            />
-            <ActionCard
-              icon={<Users size={32} />}
-              title="View Registrations"
-              description="See all registered users"
-              href="/admin/registrations"
-              color="bg-blue-600"
-            />
-            <ActionCard
-              icon={<QrCode size={32} />}
-              title="QR Scanner"
-              description="Scan tickets at gate"
-              href="/admin/scanner"
-              color="bg-green-600"
-            />
-            <ActionCard
-              icon={<BarChart3 size={32} />}
-              title="Analytics"
-              description="View event statistics"
-              href="/admin/analytics"
-              color="bg-orange-600"
-            />
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-purple-300 border-opacity-20">
-          <h2 className="text-2xl font-bold text-white mb-4">Recent Activity</h2>
-          <div className="text-purple-200 text-center py-8">
-            No recent activity. Create an event to get started!
-          </div>
-        </div>
       </main>
-
-      {/* Google Fonts */}
-      <link 
-        href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&display=swap" 
-        rel="stylesheet" 
-      />
     </div>
-  );
-}
-
-function StatCard({ 
-  icon, 
-  title, 
-  value, 
-  color 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  value: string; 
-  color: string;
-}) {
-  return (
-    <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-purple-300 border-opacity-20 hover:bg-opacity-15 transition-all duration-300">
-      <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${color} mb-4`}>
-        <div className="text-white">
-          {icon}
-        </div>
-      </div>
-      <h3 className="text-purple-200 text-sm font-medium mb-1">{title}</h3>
-      <p className="text-white text-3xl font-bold">{value}</p>
-    </div>
-  );
-}
-
-function ActionCard({ 
-  icon, 
-  title, 
-  description, 
-  href, 
-  color 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string; 
-  href: string;
-  color: string;
-}) {
-  return (
-    <a
-      href={href}
-      className="group bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-6 border border-purple-300 border-opacity-20 hover:bg-opacity-20 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-    >
-      <div className={`inline-flex p-3 rounded-lg ${color} mb-4 group-hover:scale-110 transition-transform duration-300`}>
-        <div className="text-white">
-          {icon}
-        </div>
-      </div>
-      <h3 className="text-white text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-purple-200 text-sm">{description}</p>
-    </a>
   );
 }
