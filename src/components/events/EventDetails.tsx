@@ -39,6 +39,43 @@ export default function EventDetails({
   const [error, setError] = useState<string | null>(null);
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
 
+  // ✅ Phone validation function
+  function validatePhone(phoneNumber: string): boolean {
+    // Remove all spaces, dashes, and other non-digit characters except '+'
+    const cleanedPhone = phoneNumber.replace(/[\s\-()]/g, '');
+    
+    // Indian phone number patterns:
+    // 1. 10 digits: 9876543210
+    // 2. With country code: +919876543210 or 919876543210
+    // 3. With 0 prefix: 09876543210
+    
+    const patterns = [
+      /^[6-9]\d{9}$/,           // 10 digits starting with 6-9
+      /^\+91[6-9]\d{9}$/,       // +91 followed by 10 digits
+      /^91[6-9]\d{9}$/,         // 91 followed by 10 digits
+      /^0[6-9]\d{9}$/,          // 0 followed by 10 digits
+    ];
+    
+    return patterns.some(pattern => pattern.test(cleanedPhone));
+  }
+
+  // ✅ Email validation function
+  function validateEmail(email: string): boolean {
+    if (!email) return true; // Email is optional
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+  }
+
+  // ✅ Handle phone input (allow only digits, +, and limit length)
+  function handlePhoneChange(value: string) {
+    // Allow only digits, +, spaces, dashes, and parentheses
+    const cleaned = value.replace(/[^\d+\s\-()]/g, '');
+    // Limit to reasonable length (max 15 chars for international format)
+    if (cleaned.length <= 15) {
+      setPhone(cleaned);
+    }
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -48,10 +85,36 @@ export default function EventDetails({
       setError('Event unavailable right now.');
       return;
     }
-    if (!name.trim() || !phone.trim()) {
-      setError('Name and phone are required.');
+
+    // ✅ Name validation
+    if (!name.trim()) {
+      setError('Please enter your name.');
       return;
     }
+
+    if (name.trim().length < 2) {
+      setError('Name must be at least 2 characters long.');
+      return;
+    }
+
+    // ✅ Phone validation
+    if (!phone.trim()) {
+      setError('Please enter your phone number.');
+      return;
+    }
+
+    if (!validatePhone(phone)) {
+      setError('Please enter a valid Indian phone number (10 digits starting with 6-9).');
+      return;
+    }
+
+    // ✅ Email validation (optional but must be valid if provided)
+    if (email.trim() && !validateEmail(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    // ✅ Performance type validation
     if (mode === 'performer' && !perfType) {
       setError('Please choose your performance type.');
       return;
@@ -184,6 +247,7 @@ export default function EventDetails({
               onChange={(e) => setName(e.target.value)}
               className="w-full rounded-2xl bg-white/[0.08] backdrop-blur-sm border border-white/20 px-4 py-3 outline-none text-white placeholder-gray-400 focus:bg-white/[0.12] focus:border-purple-400/50 transition-all duration-300 shadow-inner"
               placeholder="Your full name"
+              maxLength={100}
             />
           </div>
 
@@ -191,11 +255,13 @@ export default function EventDetails({
           <div>
             <label className="block text-sm mb-2 opacity-90 font-medium text-white">Phone Number</label>
             <input
+              type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => handlePhoneChange(e.target.value)}
               className="w-full rounded-2xl bg-white/[0.08] backdrop-blur-sm border border-white/20 px-4 py-3 outline-none text-white placeholder-gray-400 focus:bg-white/[0.12] focus:border-purple-400/50 transition-all duration-300 shadow-inner"
-              placeholder="+91XXXXXXXXXX"
+              placeholder="9876543210 or +919876543210"
             />
+            <p className="text-xs text-gray-400 mt-1.5">Enter 10-digit Indian mobile number</p>
           </div>
 
           {/* Email (optional) */}
@@ -250,7 +316,7 @@ export default function EventDetails({
 
           {/* Error */}
           {error && (
-            <div className="rounded-xl bg-red-500/10 border border-red-400/30 backdrop-blur-sm px-4 py-3">
+            <div className="rounded-xl bg-red-500/10 border border-red-400/30 backdrop-blur-sm px-4 py-3 animate-in fade-in slide-in-from-top-1 duration-200">
               <p className="text-red-300 text-sm">{error}</p>
             </div>
           )}
@@ -258,6 +324,7 @@ export default function EventDetails({
           {/* Submit */}
           <div className="pt-2">
             <button
+              type="submit"
               disabled={loading}
               className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-[1.02] active:scale-[0.98] text-white"
             >

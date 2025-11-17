@@ -145,7 +145,18 @@ export async function POST(req: NextRequest) {
       scannedAt: new Date(),
     });
 
+    // ✅ NEW: Update the registration to mark as checked in
+    await RegistrationModel.findOneAndUpdate(
+      { eventId, userId },
+      {
+        checkedIn: true,
+        checkedInAt: new Date(),
+        checkedInBy: 'admin-scanner', // You can pass this from request body if you have user info
+      }
+    );
+
     console.log('✅ Scan entry created:', scanEntry.userId);
+    console.log('✅ Registration marked as checked in:', userId);
 
     return NextResponse.json({
       success: true,
@@ -200,6 +211,17 @@ export async function DELETE(req: NextRequest) {
 
     // Delete all scan entries for this event
     const result = await ScanEntryModel.deleteMany({ eventId });
+
+    // ✅ OPTIONAL: Reset checkedIn status for all registrations of this event
+    // Uncomment if you want to reset check-in status when deleting scan entries
+    // await RegistrationModel.updateMany(
+    //   { eventId },
+    //   {
+    //     checkedIn: false,
+    //     checkedInAt: null,
+    //     checkedInBy: null,
+    //   }
+    // );
 
     console.log(`✅ Deleted ${result.deletedCount} scan entries for event ${eventId}`);
 
