@@ -74,7 +74,7 @@ export default function EventsPage() {
 
         {/* Event Header - Shows event name and key details */}
         <div className="w-full px-3 sm:px-4 md:px-6 pt-16 sm:pt-20 pb-6 sm:pb-8">
-          <div className="max-w-6xl mx-auto text-center space-y-3 sm:space-y-4">
+          <div className="w-full text-center space-y-3 sm:space-y-4">
             {/* Event Name */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight px-2">
               {event?.eventName || 'Niyat e Shaukh'}
@@ -133,7 +133,7 @@ export default function EventsPage() {
 
         {/* Registration Form - Appears right after header */}
         <div id="registration-section" className="w-full px-3 sm:px-4 md:px-6 py-6 sm:py-8">
-          <div className="max-w-2xl mx-auto">
+          <div className="w-full">
             {loading ? (
               <div className="text-center">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>

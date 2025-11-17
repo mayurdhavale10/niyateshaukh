@@ -5,8 +5,9 @@ import EventModel from '@/lib/models/Event';
 
 /**
  * GET /api/registrations
- * Query by: userId (preferred for scanner) OR phone/email
- * Optional: eventId to scope the search
+ * - No params: Returns ALL registrations (for admin panel)
+ * - With userId/phone/email: Returns specific registration (for scanner/lookup)
+ * - Optional eventId: Scope search to specific event
  */
 export async function GET(req: NextRequest) {
   try {
@@ -18,18 +19,52 @@ export async function GET(req: NextRequest) {
     const eventId = searchParams.get('eventId');
     const userId = searchParams.get('userId');
 
+    // ✅ NEW: If no specific query params, return ALL registrations (for admin)
     if (!phone && !email && !userId) {
-      return NextResponse.json(
-        { error: 'Provide phone, email, or userId' },
-        { status: 400 }
+      const query: Record<string, any> = {};
+      if (eventId) query.eventId = eventId;
+
+      const registrations = await RegistrationModel.find(query)
+        .sort({ registeredAt: -1 })
+        .lean();
+
+      // Fetch event details for each registration
+      const registrationsWithEvents = await Promise.all(
+        registrations.map(async (reg) => {
+          const event = await EventModel.findById(reg.eventId).lean();
+          return {
+            _id: reg._id.toString(),
+            userId: reg.userId,
+            name: reg.name,
+            phone: reg.phone,
+            email: reg.email,
+            registrationType: reg.registrationType,
+            performanceType: reg.performanceType,
+            qrCode: reg.qrCode,
+            registeredAt: reg.registeredAt,
+            checkedIn: reg.checkedIn,
+            checkedInAt: reg.checkedInAt,
+            checkedInBy: reg.checkedInBy,
+            eventName: event?.eventName || 'Unknown Event',
+            eventDate: event?.eventDate || null,
+            eventId: reg.eventId,
+          };
+        })
       );
+
+      return NextResponse.json({
+        success: true,
+        registrations: registrationsWithEvents,
+        count: registrationsWithEvents.length,
+      });
     }
 
+    // ✅ EXISTING: Specific registration lookup (for scanner/user)
     const query: Record<string, any> = {};
     if (eventId) query.eventId = eventId;
 
     if (userId) {
-      query.userId = userId; // ✅ primary path for scanner
+      query.userId = userId;
     } else if (phone && email) {
       query.$or = [{ phone }, { email }];
     } else if (phone) {
@@ -68,12 +103,14 @@ export async function GET(req: NextRequest) {
         eventName: event.eventName,
         eventDate: event.eventDate,
         registeredAt: registration.registeredAt,
+        checkedIn: registration.checkedIn,
+        checkedInAt: registration.checkedInAt,
       },
     });
   } catch (error) {
-    console.error('❌ Retrieve ticket error:', error);
+    console.error('❌ Retrieve registrations error:', error);
     return NextResponse.json(
-      { error: 'Failed to retrieve ticket' },
+      { error: 'Failed to retrieve registrations' },
       { status: 500 }
     );
   }
@@ -179,7 +216,7 @@ export async function POST(req: NextRequest) {
     const prefix = registrationType === 'performer' ? 'P' : 'A';
     const userId = `${prefix}${paddedCount}`;
 
-    // ✅ QR payload now includes phone (and name) for offline scan fallback
+    // QR payload includes phone and name for offline scan fallback
     const qrPayload = {
       userId,
       eventId,
@@ -188,7 +225,7 @@ export async function POST(req: NextRequest) {
       type: registrationType,
     };
 
-    // Generate QR code (ESM-friendly)
+    // Generate QR code
     const { toDataURL } = await import('qrcode');
     const qrCodeDataURL = await toDataURL(JSON.stringify(qrPayload), {
       width: 300,
